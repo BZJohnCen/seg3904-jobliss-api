@@ -44,8 +44,13 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  scrapeIndeedJobs:
-    handler: api-handler.scrapeIndeedJobs
+  scrapeIndeed:
+    handler: api-handler.scrapeIndeed
+    events:
+      - http:
+          path: indeed
+          method: GET
+          cors: true
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
