@@ -1,6 +1,7 @@
 'use strict';
 const axios = require('axios')
 const IndeedScraper = require('indeed-scraper')
+const osmosis = require('osmosis')
 
 //--------------- HELPER FUNCTIONS ---------------
 
