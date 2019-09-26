@@ -9,6 +9,17 @@ service: seg3904-jobliss-api # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs10.x
+  stage: dev
+  environment:
+    TEST_KEY: "${self:custom.tokens.TEST_KEY}"
+
+  package:
+    exclude:
+      - tokens.yml
+
+  custom:
+    stage: ${opt:stage, self:provider.stage}
+    tokens: ${file(tokens.yml):${self:custom.stage}}
 
 # you can overwrite defaults here
 #  stage: dev
