@@ -13,13 +13,13 @@ provider:
   environment:
     TEST_KEY: "${self:custom.tokens.TEST_KEY}"
 
-  package:
-    exclude:
-      - tokens.yml
+package:
+  exclude:
+    - tokens.yml
 
-  custom:
-    stage: ${opt:stage, self:provider.stage}
-    tokens: ${file(tokens.yml):${self:custom.stage}}
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  tokens: ${file(tokens.yml):${self:custom.stage}}
 
 # you can overwrite defaults here
 #  stage: dev
