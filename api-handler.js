@@ -33,15 +33,15 @@ module.exports.scrapeIndeed = async (event, context, cb) => {
     let qs = event.queryStringParameters
     console.log("qs:", qs)
     let queryOptions = {
-        host: qs.host,
+        host: qs.host || "www.indeed.ca",
         query: qs.query,
         city: qs.city,
         radius: qs.radius,
         level: qs.level,
-        jobType: qs.jobType,
+        jobType: qs.jobType || "fulltime",
         maxAge: qs.maxAge,
         sort: qs.sort,
-        limit: 100
+        limit: qs.limit || 50
     }
     try {
         let indeedResults = await IndeedScraper.query(queryOptions) //array of results
