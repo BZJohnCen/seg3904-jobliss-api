@@ -75,8 +75,9 @@ module.exports.scrapeJobBanks = async (event) => {
 }
 
 module.exports.scrapeWowJobs = async (event) => {
+    let qs = event.queryStringParameters
     try { 
-
+        osmosis.get(`www.wowjobs.ca/BrowseResults.aspx?q=${qs.query}`)
     } catch (err) {
         console.error('scrape wowjobs caught err:', err.message)
         return sendErrorResponse(400, err.message)
