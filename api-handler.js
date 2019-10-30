@@ -65,8 +65,9 @@ module.exports.scrapeMonster = async (event) => {
 }
 
 module.exports.scrapeJobBanks = async (event) => {
+    let qs = event.queryStringParameters
     try { 
-
+        osmosis.get(`www.jobbank.gc.ca/jobsearch/jobsearch?searchstring=${qs.query}`)
     } catch (err) {
         console.error('scrape jobbanks caught err:', err.message)
         return sendErrorResponse(400, err.message)
