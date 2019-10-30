@@ -62,3 +62,12 @@ module.exports.scrapeMonster = async (event) => {
         return sendErrorResponse(400, err.message)
     }
 }
+
+module.exports.scrapeJobBanks = async (event) => {
+    try { 
+
+    } catch (err) {
+        console.error('scrape jobbanks caught err:', err.message)
+        return sendErrorResponse(400, err.message)
+    }
+}
