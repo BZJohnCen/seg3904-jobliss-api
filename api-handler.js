@@ -53,3 +53,12 @@ module.exports.scrapeIndeed = async (event, context, cb) => {
     }
 
 };
+
+module.exports.scrapeMonster = async (event) => {
+    try { 
+
+    } catch (err) {
+        console.error('scrape monster caught err:', err.message)
+        return sendErrorResponse(400, err.message)
+    }
+}
