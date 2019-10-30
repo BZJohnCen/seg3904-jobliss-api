@@ -71,3 +71,12 @@ module.exports.scrapeJobBanks = async (event) => {
         return sendErrorResponse(400, err.message)
     }
 }
+
+module.exports.scrapeWowJobs = async (event) => {
+    try { 
+
+    } catch (err) {
+        console.error('scrape wowjobs caught err:', err.message)
+        return sendErrorResponse(400, err.message)
+    }
+}
