@@ -1,6 +1,13 @@
 {
     "queryStringParameters": {
-        "query": "",
-        "city": ""
+        "host": "www.indeed.ca",
+        "query": "Software Engineer",
+        "city": "Toronto, ON",
+        "radius": "25",
+        "level": "entry_level",
+        "jobType": "fulltime",
+        "maxAge": "7",
+        "sort": "date",
+        "limit": 100
     }
 }
