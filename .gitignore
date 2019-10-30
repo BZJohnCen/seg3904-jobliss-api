@@ -9,3 +9,5 @@ tokens.yml
 yarn.lock
 
 package-lock.json
+
+install-linux-native-modules.js
