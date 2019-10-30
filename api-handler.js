@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios')
 const IndeedScraper = require('indeed-scraper')
-// const osmosis = require('osmosis')
+const osmosis = require('osmosis')
 
 //--------------- HELPER FUNCTIONS ---------------
 
@@ -55,8 +55,9 @@ module.exports.scrapeIndeed = async (event, context, cb) => {
 };
 
 module.exports.scrapeMonster = async (event) => {
+    let qs = event.queryStringParameters
     try { 
-
+        osmosis.get(`www.monster.ca/jobs/search/?q=${qs.query}`)
     } catch (err) {
         console.error('scrape monster caught err:', err.message)
         return sendErrorResponse(400, err.message)
