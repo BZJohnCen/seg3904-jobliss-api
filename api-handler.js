@@ -1,24 +1,24 @@
 'use strict';
 const axios = require('axios')
 const IndeedScraper = require('indeed-scraper')
-const osmosis = require('osmosis')
+// const osmosis = require('osmosis')
 
 //--------------- HELPER FUNCTIONS ---------------
 
-const sendSuccessResponse = (statusCode, OKmessage) => {
+const sendSuccessResponse = (httpCode, response) => {
     return {
-        status: statusCode,
+        statusCode: httpCode,
         headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
-        body: JSON.stringify({ message: OKmessage })
+        body: JSON.stringify(response)
     }
 }
 
-const sendErrorResponse = (statusCode, ERRmessage) => {
+const sendErrorResponse = (httpCode, ERRmessage) => {
     return {
-        status: statusCode,
+        statusCode: httpCode,
         headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
@@ -29,22 +29,24 @@ const sendErrorResponse = (statusCode, ERRmessage) => {
 
 //--------------- LAMBDA FUNCTIONS ---------------
 
-module.exports.scrapeIndeed = async (event) => {
+module.exports.scrapeIndeed = async (event, context, cb) => {
     let qs = event.queryStringParameters
+    console.log("qs:", qs)
     let queryOptions = {
-        host: "www.indeed.ca",
-        query: 'Software Engineer',
-        city: 'Toronto, ON',
-        radius: '25',
-        level: 'entry_level',
-        jobType: 'fulltime',
-        maxAge: '7',
-        sort: 'date',
+        host: qs.host,
+        query: qs.query,
+        city: qs.city,
+        radius: qs.radius,
+        level: qs.level,
+        jobType: qs.jobType,
+        maxAge: qs.maxAge,
+        sort: qs.sort,
         limit: 100
     }
     try {
         let indeedResults = await IndeedScraper.query(queryOptions) //array of results
-        console.log('indeed results:\n', indeedResults)
+        // console.log('indeed results:\n', indeedResults)
+        return sendSuccessResponse(200, indeedResults)
     } catch (err) {
         console.error('scrape indeed caught err:', err.message)
         return sendErrorResponse(400, err.message)
