@@ -60,29 +60,6 @@ module.exports.scrapeMonster = async (event) => {
     let query = qs.query
     let location = qs.location
     let url = `https://www.monster.ca/jobs/search/?q=${query}&where=${location}`
-    
-    // puppeteer.launch().then(browser => 
-    //     browser.newPage())
-    //     .then(page => {
-    //         await page.goto(url);
-    //         return page.content();
-    //     })
-    //     .then(html => {
-    //         const $ = cheerio.load(html);
-    //         let jobList = []
-
-    //         $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
-    //             jobList.push({
-    //                 job_title: $('div.summary > a:not([class])', element).text(),
-    //                 link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
-    //                 job_company: $('div.summary > div.company > span.name', element).text(),
-    //                 location: $('div.summary > div.location > span.name', element).text(),
-    //                 date_posted: $('div.meta.flex-col > time', element).text()
-    //             })
-    //         })
-    //         console.log('jobList:\n', jobList)
-    //     })
-    //     .catch(console.error);
    
     try {
         let browser = await puppeteer.launch()
@@ -93,15 +70,15 @@ module.exports.scrapeMonster = async (event) => {
         let jobList = []
         $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
             jobList.push({
-                job_title: $('div.summary > a:not([class])', element).text(),
+                job_title: $('div.summary > header > h2.title > a:not([class])', element).text(),
                 link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
                 job_company: $('div.summary > div.company > span.name', element).text(),
                 location: $('div.summary > div.location > span.name', element).text(),
                 date_posted: $('div.meta.flex-col > time', element).text()
             })
         })
-        console.log('jobList:\n', jobList)
         await browser.close()
+        return sendSuccessResponse(200, jobList)
     } catch (err) {
         console.error('scrape monster caught err:', err.message)
         return sendErrorResponse(400, err.message)
