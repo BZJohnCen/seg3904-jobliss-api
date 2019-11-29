@@ -57,10 +57,13 @@ module.exports.scrapeIndeed = async (event, context, cb) => {
 
 module.exports.scrapeMonster = async (event) => {
     let qs = event.queryStringParameters
-    let query = qs.query
-    let location = qs.location
-    let url = `https://www.monster.ca/jobs/search/?q=${query}&where=${location}`
-   
+    let qParams = {
+        query: qs.query,
+        location: qs.location,
+        radius: qs.radius || "5", //km
+    }
+    let url = `https://www.monster.ca/jobs/search/?q=${qParams.query}&where=${qParams.location}&rad=${qParams.radius}`
+
     try {
         let browser = await puppeteer.launch()
         let page = await browser.newPage()
