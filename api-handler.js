@@ -90,7 +90,31 @@ module.exports.scrapeMonster = async (event) => {
 
 module.exports.scrapeJobBanks = async (event) => {
     let qs = event.queryStringParameters
+    // let qParams = {
+    //     query: qs.query,
+    //     location: qs.location,
+    //     radius: qs.radius || "5", //km
+    // }
+    let url = `www.jobbank.gc.ca/jobsearch/jobsearch?`
+
     try { 
+        let browser = await puppeteer.launch()
+        let page = await browser.newPage()
+        await page.goto(url)
+        let html = await page.content()
+        const $ = cheerio.load(html)
+        let jobList = []
+        $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
+            jobList.push({
+                job_title: $('div.summary > header > h2.title > a:not([class])', element).text(),
+                link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
+                job_company: $('div.summary > div.company > span.name', element).text(),
+                location: $('div.summary > div.location > span.name', element).text(),
+                date_posted: $('div.meta.flex-col > time', element).text()
+            })
+        })
+        await browser.close()
+        // return sendSuccessResponse(200, jobList)
     } catch (err) {
         console.error('scrape jobbanks caught err:', err.message)
         return sendErrorResponse(400, err.message)
