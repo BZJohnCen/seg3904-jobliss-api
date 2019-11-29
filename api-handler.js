@@ -1,7 +1,8 @@
 'use strict';
 const axios = require('axios')
 const IndeedScraper = require('indeed-scraper')
-// const osmosis = require('osmosis')
+const cheerio = require('cheerio')
+const puppeteer = require('puppeteer')
 
 //--------------- HELPER FUNCTIONS ---------------
 
@@ -56,8 +57,51 @@ module.exports.scrapeIndeed = async (event, context, cb) => {
 
 module.exports.scrapeMonster = async (event) => {
     let qs = event.queryStringParameters
-    try { 
-        // osmosis.get(`www.monster.ca/jobs/search/?q=${qs.query}`)
+    let query = qs.query
+    let location = qs.location
+    let url = `https://www.monster.ca/jobs/search/?q=${query}&where=${location}`
+    
+    // puppeteer.launch().then(browser => 
+    //     browser.newPage())
+    //     .then(page => {
+    //         await page.goto(url);
+    //         return page.content();
+    //     })
+    //     .then(html => {
+    //         const $ = cheerio.load(html);
+    //         let jobList = []
+
+    //         $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
+    //             jobList.push({
+    //                 job_title: $('div.summary > a:not([class])', element).text(),
+    //                 link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
+    //                 job_company: $('div.summary > div.company > span.name', element).text(),
+    //                 location: $('div.summary > div.location > span.name', element).text(),
+    //                 date_posted: $('div.meta.flex-col > time', element).text()
+    //             })
+    //         })
+    //         console.log('jobList:\n', jobList)
+    //     })
+    //     .catch(console.error);
+   
+    try {
+        let browser = await puppeteer.launch()
+        let page = await browser.newPage()
+        await page.goto(url)
+        let html = await page.content()
+        const $ = cheerio.load(html)
+        let jobList = []
+        $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
+            jobList.push({
+                job_title: $('div.summary > a:not([class])', element).text(),
+                link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
+                job_company: $('div.summary > div.company > span.name', element).text(),
+                location: $('div.summary > div.location > span.name', element).text(),
+                date_posted: $('div.meta.flex-col > time', element).text()
+            })
+        })
+        console.log('jobList:\n', jobList)
+        await browser.close()
     } catch (err) {
         console.error('scrape monster caught err:', err.message)
         return sendErrorResponse(400, err.message)
@@ -67,7 +111,6 @@ module.exports.scrapeMonster = async (event) => {
 module.exports.scrapeJobBanks = async (event) => {
     let qs = event.queryStringParameters
     try { 
-        // osmosis.get(`www.jobbank.gc.ca/jobsearch/jobsearch?searchstring=${qs.query}`)
     } catch (err) {
         console.error('scrape jobbanks caught err:', err.message)
         return sendErrorResponse(400, err.message)
@@ -77,7 +120,6 @@ module.exports.scrapeJobBanks = async (event) => {
 module.exports.scrapeWowJobs = async (event) => {
     let qs = event.queryStringParameters
     try { 
-        // osmosis.get(`www.wowjobs.ca/BrowseResults.aspx?q=${qs.query}`)
     } catch (err) {
         console.error('scrape wowjobs caught err:', err.message)
         return sendErrorResponse(400, err.message)

@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "axios": "^0.19.0",
+    "cheerio": "^1.0.0-rc.3",
     "indeed-scraper": "^3.0.2",
+    "puppeteer": "^2.0.0",
     "serverless": "^1.55.1"
   },
   "name": "seg3904-jobliss-api",
