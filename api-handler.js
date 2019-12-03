@@ -2,7 +2,6 @@
 const axios = require('axios')
 const IndeedScraper = require('indeed-scraper')
 const cheerio = require('cheerio')
-const puppeteer = require('puppeteer')
 
 //--------------- HELPER FUNCTIONS ---------------
 
@@ -65,22 +64,21 @@ module.exports.scrapeMonster = async (event) => {
     let url = `https://www.monster.ca/jobs/search/?q=${qParams.query}&where=${qParams.location}&rad=${qParams.radius}`
 
     try {
-        let browser = await puppeteer.launch()
-        let page = await browser.newPage()
-        await page.goto(url)
-        let html = await page.content()
+        let response = await axios.get(url)
+        // console.log('response.data:\n', response.data)
+        let html = response.data
+        
         const $ = cheerio.load(html)
         let jobList = []
         $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
             jobList.push({
-                job_title: $('div.summary > header > h2.title > a:not([class])', element).text(),
+                job_title: $('div.summary > header > h2.title > a:not([class])', element).text().trim(),
                 link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
                 job_company: $('div.summary > div.company > span.name', element).text(),
-                location: $('div.summary > div.location > span.name', element).text(),
+                location: $('div.summary > div.location > span.name', element).text().trim(),
                 date_posted: $('div.meta.flex-col > time', element).text()
             })
         })
-        await browser.close()
         return sendSuccessResponse(200, jobList)
     } catch (err) {
         console.error('scrape monster caught err:', err.message)
@@ -90,31 +88,30 @@ module.exports.scrapeMonster = async (event) => {
 
 module.exports.scrapeJobBanks = async (event) => {
     let qs = event.queryStringParameters
-    // let qParams = {
-    //     query: qs.query,
-    //     location: qs.location,
-    //     radius: qs.radius || "5", //km
-    // }
-    let url = `www.jobbank.gc.ca/jobsearch/jobsearch?`
+    let qParams = {
+        query: qs.query
+    }
+    let url = `https://www.jobbank.gc.ca/jobsearch/jobsearch?sort=M&searchstring=${qParams.query}`
 
     try { 
-        let browser = await puppeteer.launch()
-        let page = await browser.newPage()
-        await page.goto(url)
-        let html = await page.content()
+        let response = await axios.get(url)
+        console.log('url:', url)
+        // console.log('response.data:\n', response.data)
+        let html = response.data
+        
         const $ = cheerio.load(html)
         let jobList = []
-        $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
+        $('div.results-jobs').find('article').each((i, element) => {
             jobList.push({
-                job_title: $('div.summary > header > h2.title > a:not([class])', element).text(),
-                link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
-                job_company: $('div.summary > div.company > span.name', element).text(),
-                location: $('div.summary > div.location > span.name', element).text(),
-                date_posted: $('div.meta.flex-col > time', element).text()
+                job_title: $('a.resultJobItem > h3.title > span.noctitle', element).text().trim(),
+                link: `https://www.jobbank.gc.ca${$('a.resultJobItem', element).attr('href')}`,
+                job_company: $('a.resultJobItem > ul.list-unstyled > li.business', element).text().trim(),
+                location: $('a.resultJobItem > ul.list-unstyled > li.location:nth-child(3)', element).text().trim(),
+                date_posted: $('a.resultJobItem > ul.list-unstyled > li.date', element).text().trim(),
+                salary: $('a.resultJobItem > ul.list-unstyled > li.salary', element).text().trim()
             })
         })
-        await browser.close()
-        // return sendSuccessResponse(200, jobList)
+        return sendSuccessResponse(200, jobList)
     } catch (err) {
         console.error('scrape jobbanks caught err:', err.message)
         return sendErrorResponse(400, err.message)

@@ -1,6 +1,5 @@
 {
     "queryStringParameters": {
-        "query": "",
-        "location": ""
+        "query": "developer in ottawa"
     }
 }
