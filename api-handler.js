@@ -93,6 +93,19 @@ module.exports.scrapeJobBanks = async (event) => {
     }
     let url = `https://www.jobbank.gc.ca/jobsearch/jobsearch?sort=M&searchstring=${qParams.query}`
 
+    const formatFields = (jobInfo) => {
+        let link = "https://www.jobbank.gc.ca" + jobInfo.link.substring(0, jobInfo.link.indexOf(";")) + jobInfo.link.substring(jobInfo.link.indexOf("?"), jobInfo.link.length)
+        let location = jobInfo.location.split(" ")
+        location = (location[location.length - 2] + location[location.length - 1]).trim()
+        let salary = jobInfo.salary.split(" ")
+        salary = salary.slice(salary.indexOf("\t\t\tSalary"), salary.length)
+        salary = salary.join(" ").trim()
+        let job_title = (jobInfo.job_title.includes("\n")) ? 
+            jobInfo.job_title.substring(0, jobInfo.job_title.indexOf("\n")) : jobInfo.job_title
+        return { ...jobInfo, link, location, salary, job_title }
+        
+    }
+
     try { 
         let response = await axios.get(url)
         console.log('url:', url)
@@ -102,13 +115,23 @@ module.exports.scrapeJobBanks = async (event) => {
         const $ = cheerio.load(html)
         let jobList = []
         $('div.results-jobs').find('article').each((i, element) => {
-            jobList.push({
+            let rawJobInfo = {
                 job_title: $('a.resultJobItem > h3.title > span.noctitle', element).text().trim(),
-                link: `https://www.jobbank.gc.ca${$('a.resultJobItem', element).attr('href')}`,
+                link: $('a.resultJobItem', element).attr('href'),
                 job_company: $('a.resultJobItem > ul.list-unstyled > li.business', element).text().trim(),
                 location: $('a.resultJobItem > ul.list-unstyled > li.location:nth-child(3)', element).text().trim(),
                 date_posted: $('a.resultJobItem > ul.list-unstyled > li.date', element).text().trim(),
                 salary: $('a.resultJobItem > ul.list-unstyled > li.salary', element).text().trim()
+            }
+            
+            let formattedJobInfo = formatFields(rawJobInfo)
+            jobList.push({
+                job_title: formattedJobInfo.job_title,
+                link: formattedJobInfo.link,
+                job_company: formattedJobInfo.job_company,
+                location: formattedJobInfo.location,
+                date_posted: formattedJobInfo.date_posted,
+                salary: formattedJobInfo.salary
             })
         })
         return sendSuccessResponse(200, jobList)
