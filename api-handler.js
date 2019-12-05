@@ -123,7 +123,6 @@ module.exports.scrapeJobBanks = async (event) => {
                 date_posted: $('a.resultJobItem > ul.list-unstyled > li.date', element).text().trim(),
                 salary: $('a.resultJobItem > ul.list-unstyled > li.salary', element).text().trim()
             }
-            
             let formattedJobInfo = formatFields(rawJobInfo)
             jobList.push({
                 job_title: formattedJobInfo.job_title,

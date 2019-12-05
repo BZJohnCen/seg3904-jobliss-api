@@ -11,15 +11,10 @@ provider:
 package:
   exclude:
     - tokens.yml
-    # - node_modules/puppeteer/.local-chromium/**
 
 custom:
   stage: ${opt:stage, self:provider.stage}
   tokens: ${file(tokens.yml):${self:custom.stage}}
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
 
 
 functions:
@@ -40,12 +35,12 @@ functions:
           cors: true
 
   scrapeJobBanks:
-      handler: api-handler.scrapeJobBanks
-      events:
-        - http:
-            path: jobbanks
-            method: get
-            cors: true          
+    handler: api-handler.scrapeJobBanks
+    events:
+      - http:
+          path: jobbanks
+          method: get
+          cors: true          
           
   scrapeWowJobs:
     handler: api-handler.scrapeWowJobs
