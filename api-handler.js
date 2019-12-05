@@ -73,7 +73,7 @@ module.exports.scrapeMonster = async (event) => {
         $('div[id="SearchResults"]').find('section > div.flex-row').each((i, element) => {
             jobList.push({
                 job_title: $('div.summary > header > h2.title > a:not([class])', element).text().trim(),
-                link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
+                url: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
                 job_company: $('div.summary > div.company > span.name', element).text(),
                 location: $('div.summary > div.location > span.name', element).text().trim(),
                 date_posted: $('div.meta.flex-col > time', element).text(),
@@ -95,16 +95,15 @@ module.exports.scrapeJobBanks = async (event) => {
     let url = `https://www.jobbank.gc.ca/jobsearch/jobsearch?sort=M&searchstring=${qParams.query}`
 
     const formatFields = (jobInfo) => {
-        let link = "https://www.jobbank.gc.ca" + jobInfo.link.substring(0, jobInfo.link.indexOf(";")) + jobInfo.link.substring(jobInfo.link.indexOf("?"), jobInfo.link.length)
+        let url = "https://www.jobbank.gc.ca" + jobInfo.url.substring(0, jobInfo.url.indexOf(";")) + jobInfo.url.substring(jobInfo.url.indexOf("?"), jobInfo.url.length)
         let location = jobInfo.location.split(" ")
         location = (location[location.length - 2] + location[location.length - 1]).trim()
         let salary = jobInfo.salary.split(" ")
-        salary = salary.slice(salary.indexOf("\t\t\tSalary"), salary.length)
+        salary = (salary.indexOf("\t\t\tSalary:") === -1) ? salary.slice(salary.indexOf("\t\t\tSalary"), salary.length) : salary.slice(salary.indexOf("\t\t\tSalary:") + 1, salary.length)
         salary = salary.join(" ").trim()
         let job_title = (jobInfo.job_title.includes("\n")) ? 
             jobInfo.job_title.substring(0, jobInfo.job_title.indexOf("\n")) : jobInfo.job_title
-        return { ...jobInfo, link, location, salary, job_title }
-        
+        return { ...jobInfo, url, location, salary, job_title }
     }
 
     try { 
@@ -118,7 +117,7 @@ module.exports.scrapeJobBanks = async (event) => {
         $('div.results-jobs').find('article').each((i, element) => {
             let rawJobInfo = {
                 job_title: $('a.resultJobItem > h3.title > span.noctitle', element).text().trim(),
-                link: $('a.resultJobItem', element).attr('href'),
+                url: $('a.resultJobItem', element).attr('href'),
                 job_company: $('a.resultJobItem > ul.list-unstyled > li.business', element).text().trim(),
                 location: $('a.resultJobItem > ul.list-unstyled > li.location:nth-child(3)', element).text().trim(),
                 date_posted: $('a.resultJobItem > ul.list-unstyled > li.date', element).text().trim(),
@@ -127,7 +126,7 @@ module.exports.scrapeJobBanks = async (event) => {
             let formattedJobInfo = formatFields(rawJobInfo)
             jobList.push({
                 job_title: formattedJobInfo.job_title,
-                link: formattedJobInfo.link,
+                url: formattedJobInfo.url,
                 job_company: formattedJobInfo.job_company,
                 location: formattedJobInfo.location,
                 date_posted: formattedJobInfo.date_posted,
@@ -160,7 +159,7 @@ module.exports.scrapeWowJobs = async (event) => {
         $('div.jobs').find('div.result.js-job').each((i, element) => {            
             jobList.push({
                 job_title: $('div:not([class]) > a.link.js-job-link', element).text().trim(),
-                link: `https://www.wowjobs.ca` + $('div:not([class]) > a.link.js-job-link', element).attr('href'),
+                url: `https://www.wowjobs.ca` + $('div:not([class]) > a.link.js-job-link', element).attr('href'),
                 job_company: $('div.employer', element).text().split(" - ")[0],
                 location: $('div.employer > span.location', element).text().trim(),
                 summary: $('div.snippet', element).text().trim(),
