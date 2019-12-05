@@ -76,7 +76,8 @@ module.exports.scrapeMonster = async (event) => {
                 link: $('div.summary > header > h2.title > a:not([class])', element).attr('href'),
                 job_company: $('div.summary > div.company > span.name', element).text(),
                 location: $('div.summary > div.location > span.name', element).text().trim(),
-                date_posted: $('div.meta.flex-col > time', element).text()
+                date_posted: $('div.meta.flex-col > time', element).text(),
+                source: "monster"
             })
         })
         return sendSuccessResponse(200, jobList)
@@ -130,7 +131,8 @@ module.exports.scrapeJobBanks = async (event) => {
                 job_company: formattedJobInfo.job_company,
                 location: formattedJobInfo.location,
                 date_posted: formattedJobInfo.date_posted,
-                salary: formattedJobInfo.salary
+                salary: formattedJobInfo.salary,
+                source: "jobbanks"
             })
         })
         return sendSuccessResponse(200, jobList)
@@ -142,7 +144,31 @@ module.exports.scrapeJobBanks = async (event) => {
 
 module.exports.scrapeWowJobs = async (event) => {
     let qs = event.queryStringParameters
+    let qParams = {
+        query: qs.query,
+        location: qs.location,
+        radius: qs.radius || "25", //km
+    }
+    let url = `https://www.wowjobs.ca/BrowseResults.aspx?q=${qParams.query}&l=${qParams.location}&sr=${qParams.radius}`
     try { 
+        let response = await axios.get(url)
+        // console.log('response.data:\n', response.data)
+        let html = response.data
+        
+        const $ = cheerio.load(html)
+        let jobList = []
+        $('div.jobs').find('div.result.js-job').each((i, element) => {            
+            jobList.push({
+                job_title: $('div:not([class]) > a.link.js-job-link', element).text().trim(),
+                link: `https://www.wowjobs.ca` + $('div:not([class]) > a.link.js-job-link', element).attr('href'),
+                job_company: $('div.employer', element).text().split(" - ")[0],
+                location: $('div.employer > span.location', element).text().trim(),
+                summary: $('div.snippet', element).text().trim(),
+                date_posted: ($('div.tags', element).text().trim() === "More") ? "N/A" : $('div.tags', element).text().trim().split(" - ")[0],
+                source: "wowjobs"
+            })
+        })
+        return sendSuccessResponse(200, jobList)
     } catch (err) {
         console.error('scrape wowjobs caught err:', err.message)
         return sendErrorResponse(400, err.message)
