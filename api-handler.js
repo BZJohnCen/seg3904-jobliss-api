@@ -114,26 +114,29 @@ module.exports.scrapeJobBanks = async (event) => {
         
         const $ = cheerio.load(html)
         let jobList = []
-        $('div.results-jobs').find('article').each((i, element) => {
-            let rawJobInfo = {
-                job_title: $('a.resultJobItem > h3.title > span.noctitle', element).text().trim(),
-                url: $('a.resultJobItem', element).attr('href'),
-                job_company: $('a.resultJobItem > ul.list-unstyled > li.business', element).text().trim(),
-                location: $('a.resultJobItem > ul.list-unstyled > li.location:nth-child(3)', element).text().trim(),
-                date_posted: $('a.resultJobItem > ul.list-unstyled > li.date', element).text().trim(),
-                salary: $('a.resultJobItem > ul.list-unstyled > li.salary', element).text().trim()
-            }
-            let formattedJobInfo = formatFields(rawJobInfo)
-            jobList.push({
-                job_title: formattedJobInfo.job_title,
-                url: formattedJobInfo.url,
-                job_company: formattedJobInfo.job_company,
-                location: formattedJobInfo.location,
-                date_posted: formattedJobInfo.date_posted,
-                salary: formattedJobInfo.salary,
-                source: "jobbanks"
+        console.log('results num:', $('div.results-nav > div.jobalert-results-group.row > div.results-summary > h2 > span.found').text())
+        if ($('div.results-nav > div.jobalert-results-group.row > div.results-summary > h2 > span.found').text() != 0) {
+            $('div.results-jobs').find('article').each((i, element) => {
+                let rawJobInfo = {
+                    job_title: $('a.resultJobItem > h3.title > span.noctitle', element).text().trim(),
+                    url: $('a.resultJobItem', element).attr('href'),
+                    job_company: $('a.resultJobItem > ul.list-unstyled > li.business', element).text().trim(),
+                    location: $('a.resultJobItem > ul.list-unstyled > li.location:nth-child(3)', element).text().trim(),
+                    date_posted: $('a.resultJobItem > ul.list-unstyled > li.date', element).text().trim(),
+                    salary: $('a.resultJobItem > ul.list-unstyled > li.salary', element).text().trim()
+                }
+                let formattedJobInfo = formatFields(rawJobInfo)
+                jobList.push({
+                    job_title: formattedJobInfo.job_title,
+                    url: formattedJobInfo.url,
+                    job_company: formattedJobInfo.job_company,
+                    location: formattedJobInfo.location,
+                    date_posted: formattedJobInfo.date_posted,
+                    salary: formattedJobInfo.salary,
+                    source: "jobbanks"
+                })
             })
-        })
+        }
         return sendSuccessResponse(200, jobList)
     } catch (err) {
         console.error('scrape jobbanks caught err:', err.message)
