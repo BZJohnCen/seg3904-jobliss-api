@@ -1,0 +1,7 @@
+{
+    "queryStringParameters": {
+        "query": "developer",
+        "location": "toronto, ontario",
+        "radius": ""
+    }
+}
