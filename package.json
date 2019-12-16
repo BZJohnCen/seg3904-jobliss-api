@@ -10,7 +10,16 @@
     "serverless": "^1.59.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "IndeedLocal": "sls invoke local -f scrapeIndeed -p mock-events/scrapeIndeed.json",
+    "MonsterLocal": "sls invoke local -f scrapeMonster -p mock-events/scrapeMonster.json",
+    "JobBanksLocal": "sls invoke local -f scrapeJobBanks -p mock-events/scrapeJobBanks.json",
+    "WowJobsLocal": "sls invoke local -f scrapeWowJobs -p mock-events/scrapeWowJobs.json",
+    "IndeedRemote": "sls invoke -f scrapeIndeed -p mock-events/scrapeIndeed.json",
+    "MonsterRemote": "sls invoke -f scrapeMonster -p mock-events/scrapeMonster.json",
+    "JobBanksRemote": "sls invoke -f scrapeJobBanks -p mock-events/scrapeJobBanks.json",
+    "WowJobsRemote": "sls invoke -f scrapeWowJobs -p mock-events/scrapeWowJobs.json"
+    
   },
   "repository": {
     "type": "git",
